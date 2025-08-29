@@ -182,8 +182,8 @@ if debugconsole then debuginputon = true; debuginput = "print()"; print("DEBUG O
 local debugGraph,fpsGraph,memGraph,drawGraph
 local debugGraphs = false
 
-VERSION = 13.2002
-VERSIONSTRING = "13.2 (10/26/2024)"
+VERSION = 13.2003
+VERSIONSTRING = "13.2 (8/29/2025)"
 ANDROIDVERSION = 18
 
 android = (love.system.getOS() == "Android" or love.system.getOS() == "iOS") --[DROID]
@@ -281,7 +281,7 @@ function love.load()
 		changescale(scale, fullscreen)
 	end
 
-	love.window.setTitle( "Mari0: AE" )
+	love.window.setTitle( "Mari0: GE" )
 	
 	love.window.setIcon(love.image.newImageData("graphics/icon.png"))
 	
@@ -369,19 +369,7 @@ function love.load()
 	math.randomseed(os.time());math.random();math.random()
 	
 	--intro
-	loadingtexts = {"reticulating splines", "rendering important stuff", "01110000011011110110111001111001", "sometimes, i dream about cheese",
-					"baking cake", "happy explosion day", "raising coolness by a fifth", "yay facepunch", "stabbing myself", "sharpening knives",
-					"tanaka, thai kick", "loading game genie..", "slime will find you", "becoming self-aware", "it's a secret to everybody", "there is no minus world", 
-					"oh my god, jc, a bomb", "silly loading message here", "motivational art by jorichi", "you're my favorite deputy", 
-					"licensed under wtfpl", "banned in australia", "loading anti-piracy module", "watch out there's a sni", "attack while its tail's up!", 
-					"what a horrible night to have a curse", "han shot first", "establishing connection to nsa servers..","how do i programm", 
-					"making palette inaccurate..", "y cant mario crawl?", "please hold..", "avoiding lawsuits", "loading bugs", "traduciendo a ingles",
-					"fixign typo..", "swing your arms", "this message will self destruct in 3 2 1", "preparing deadly neurotoxin", "loading asleons entetis..", 
-					"now with online multiplayer", "any second now..", "all according to keikaku", "we need pow blocks!", "cross your fingers",
-					"not accurate to the nes!", "improved stability to enhance user experience.", "0118 999 881 999 119 7253", "hoo-ray",
-					"removing herobrine", "how do i play multiplayer????", "not mario maker", "hello there", "this statement is false", 
-					"zap to the extreme", "it just works", "eat your arms", "travelling qpus...", "im a tire", "in real life!", "bold and brash", 
-					"giant enemy crabs", "but im super duper, with a big tuper", "see that mountain? you can climb it", "loading alesan99's stuff"}
+	loadingtexts = {"welcome to gitsnup's entities", "weird shrooms...", "hey where'd my plumber go?", "see that closet? you can fall in it", "uhhhhhh", "like and subscribe for more hyperlink blocked", "help im bleeding"}
 						
 	loadingtext = loadingtexts[math.random(#loadingtexts)]
 	loadingbardraw(1)
@@ -721,7 +709,7 @@ function love.load()
 	--menut tips
 	menutips = {"resize the game window by changing the scale to 'resizable' in the options!",
 			"download dlc mappacks by going to the dlc tab in the mappack menu!",
-			"is there a problem with the mod? tell me at the stabyourself.net forums!",
+			"is there a problem with the mod? surely it'll be patched!",
 			"there are currently about " .. math.floor(entitiescount-100) .. " new entities in this mod! try them out!",
 			--"change your mappack folder to 'alesans_entities/mappacks' in the options to prevent crashes when you use unmodded mari0!",
 			"lock your mouse with f12!",
@@ -735,7 +723,8 @@ function love.load()
 			"play with friends online! press the left key to start!",
 			"enter fullscreen with alt and enter.",
 			"change your character in the settings!",
-			"add more playable characters in the 'mari0/alesans_entities/characters' folder."}
+			"add more playable characters in the 'mari0/alesans_entities/characters' folder."
+			"maybe someday i'll be a unicorn duck."}
 	disabletips = false
 
 	loadingbardraw(1)
