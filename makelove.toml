@@ -1,4 +1,4 @@
-name = "mari0_ae"
+name = "mari0_ge"
 default_targets = ["win32", "win64", "appimage", "macos"]
 build_directory = "makelove-build"
 icon_file = "graphics/icon.png"
@@ -14,7 +14,7 @@ love_files = [
 ProductName = "Mari0: AE"
 
 [linux.desktop_file_metadata]
-Name = "Mari0: AE"
+Name = "Mari0: GE"
 
 [macos.app_metadata]
-CFBundleDisplayName = "Mari0: AE"
+CFBundleDisplayName = "Mari0: GE"
