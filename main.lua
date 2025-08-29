@@ -724,7 +724,8 @@ function love.load()
 			"enter fullscreen with alt and enter.",
 			"change your character in the settings!",
 			"add more playable characters in the 'mari0/alesans_entities/characters' folder."
-			"maybe someday i'll be a unicorn duck."}
+			"maybe someday i'll be a unicorn duck."
+	}
 	disabletips = false
 
 	loadingbardraw(1)
