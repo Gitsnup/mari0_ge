@@ -1,5 +1,5 @@
 <p align="center"><img src="https://i.imgur.com/U5xzR1h.png"></p>
-<p align="center">This is the repository for my mod Mari0: Alesan99's Entities</p>
+<p align="center">This is the repository for my fork of Mari0: Alesan99's Entities</p>
 
 ## 👷 Contributions
 
@@ -11,11 +11,15 @@ While I appreciate the help, the game is no longer under active development so p
 
 Suggest downloadable game content here: https://github.com/qixils/mari0pository
 
+## QNA
+Q: "Why did you fork this fork? It doesn't seem worth it!"
+A: "I felt like it, since the last current development build didn't even come out in a couple months. Last one was uh... 5 months ago. The artifacts expired, basically."
+
 ## 📥 Downloads
 
-[**Downloads are available here.**](https://forum.stabyourself.net/viewtopic.php?f=13&t=3636)
+[**Downloads for Mari0: AE are available here.**](https://forum.stabyourself.net/viewtopic.php?f=13&t=3636)
 
-Development builds are available [here](https://github.com/alesan99/mari0_ae/actions).
+Newly compiled development builds are available [here](https://github.com/Gitsnup/mari0_ge/actions).
 
 ## 💡 About
 
@@ -50,4 +54,5 @@ It even has bonus features like online multiplayer, custom characters, custom en
 Please see [here](https://forum.stabyourself.net/viewtopic.php?f=13&t=3636)
 or the top of main.lua
 
-Thanks to [**NNB**](https://github.com/NNBnh) for this GitHub README page
+Thanks to [**NNB**](https://github.com/NNBnh) for this GitHub README page, and Alesan99 for creating Mari0:AE!
+
