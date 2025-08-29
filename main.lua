@@ -723,9 +723,8 @@ function love.load()
 			"play with friends online! press the left key to start!",
 			"enter fullscreen with alt and enter.",
 			"change your character in the settings!",
-			"add more playable characters in the 'mari0/alesans_entities/characters' folder."
-			"maybe someday i'll be a unicorn duck."
-	}
+			"add more playable characters in the 'mari0/alesans_entities/characters' folder.",
+			"maybe someday i'll be a unicorn duck."}
 	disabletips = false
 
 	loadingbardraw(1)
