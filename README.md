@@ -1,4 +1,4 @@
-<p align="center"><img src="https://i.imgur.com/U5xzR1h.png"></p>
+<p align="center"><img src="(https://github.com/Gitsnup/mari0_ge/blob/master/.github/U5xzR1h.png)"></p>
 <p align="center">This is the repository for my fork of Mari0: Alesan99's Entities</p>
 
 ## 👷 Contributions
