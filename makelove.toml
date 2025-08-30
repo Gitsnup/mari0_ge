@@ -11,7 +11,7 @@ love_files = [
 # TODO: more metadata
 
 [windows.exe_metadata]
-ProductName = "Mari0: AE"
+ProductName = "Mari0: GE"
 
 [linux.desktop_file_metadata]
 Name = "Mari0: GE"
