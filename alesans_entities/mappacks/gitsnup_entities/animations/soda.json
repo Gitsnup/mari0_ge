@@ -1,0 +1,5 @@
+{
+    "actions": [ [ "addpoints", "100000" ], [ "playmusic", "none" ], [ "disablecontrols", "everyone" ], [ "killallenemies" ], [ "screenshake", "5" ], [ "changeforeground", "sodalicious" ], [ "playsound", "koopalingend" ], [ "setplayersize", "7", "everyone" ], [ "sleep", "5" ], [ "nextlevel" ] ],
+    "conditions": [  ],
+    "triggers": [ [ "animationtrigger", "soda" ] ]
+}

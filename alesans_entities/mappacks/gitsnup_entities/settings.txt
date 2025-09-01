@@ -1,0 +1,4 @@
+name=gitsnup's mappack
+author=gitsnup
+description=test out the     gameA for three!
+lives=0

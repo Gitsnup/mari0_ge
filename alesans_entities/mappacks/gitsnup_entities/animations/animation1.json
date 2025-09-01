@@ -1,0 +1,5 @@
+{
+    "actions": [ [ "screenshake", "2" ], [ "playsound", "boom" ], [ "playsound", "blockbreak" ], [ "changebackground", "kablooey" ] ],
+    "conditions": [  ],
+    "triggers": [ [ "animationtrigger", "peepee" ] ]
+}

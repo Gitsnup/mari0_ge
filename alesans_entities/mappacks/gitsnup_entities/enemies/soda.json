@@ -1,0 +1,10 @@
+base=mushroom
+{
+	"makesmariogrow": false,
+	"movement": "none",
+	"speedx": 0,
+	"triggeranimationondeath": "soda",
+	"customscale": 0.5,
+	"offsetX": 2,
+	"offsetY": 8
+}

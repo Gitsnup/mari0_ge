@@ -1,0 +1,15 @@
+endingtextcolor=60, 188, 252
+endingcolorname=sky
+endingtext=sodalicious!,you have finished the soda quest
+playername=player
+hudtextcolor=255, 255, 255
+hudcolorname=white
+hudvisible=true
+hudworldletter=false
+hudoutline=true
+hudsimple=false
+toadtext=thank you mario!,but our princess is in,another mappack!
+peachtext=thank you mario!,your quest is over.,we present you a new quest.,push button b,to play as steve
+steve=true
+levelscreen=2|2|soda... so far...,1|2|use the mouse to aim the portal gun!,1|1|a complimentary soda will be provided soon.,1|3|hold lshift to run!,2|1|press alt+f4 to quit the game!
+hudhidecollectables=f,f,f,f,f,f,f,f,f,f

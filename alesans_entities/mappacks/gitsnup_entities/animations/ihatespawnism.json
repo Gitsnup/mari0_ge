@@ -1,0 +1,5 @@
+{
+    "actions": [ [ "animationoutput", "spawn", "toggle" ] ],
+    "conditions": [  ],
+    "triggers": [ [ "mapload" ] ]
+}
