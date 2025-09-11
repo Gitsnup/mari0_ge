@@ -1178,6 +1178,11 @@ function love.update(dt)
 			for i, v in pairs(soundlist) do
 				v:setPitch( speed )
 			end
+			for i, v in pairs(enemiesdata) do
+				if v.sound then
+					v.sound:setPitch( speed )
+				end
+			end
 			music.pitch = speed
 			love.audio.setVolume(volume)
 		else
@@ -2590,7 +2595,7 @@ end
 function love.focus(f)
 	if (not f) and gamestate == "game"and (not editormode) and (not testlevel) and (not levelfinished) and (not everyonedead) and (not CLIENT) and (not SERVER) and (not dontPauseOnUnfocus) then
 		pausemenuopen = true
-		pausedaudio = love.audio.pause()
+		pausedaudio = pausedaudio or love.audio.pause()
 	end
 end
 
