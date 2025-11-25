@@ -18,6 +18,24 @@ local files = {}
 local loaddirectory
 local newfile, newfolder, deletefile, parentdirectory, getfile, editfile, downloadfile, renamefile, openprompt, closeprompt
 
+-- HELPER: Sort folders first, then files, then alphabetical
+local function sort_files_logic(a, b)
+	local path_a = (dir == "" and a) or (dir .. "/" .. a)
+	local path_b = (dir == "" and b) or (dir .. "/" .. b)
+	
+	-- Safe check in case file info is missing
+	local info_a = love.filesystem.getInfo(path_a) or {type="file"}
+	local info_b = love.filesystem.getInfo(path_b) or {type="file"}
+
+	if info_a.type == "directory" and info_b.type ~= "directory" then
+		return true
+	elseif info_a.type ~= "directory" and info_b.type == "directory" then
+		return false
+	else
+		return a:lower() < b:lower()
+	end
+end
+
 function openfile(path)
 	if android then
 		filebrowser_load(path)
@@ -69,40 +87,51 @@ end
 function loaddirectory(directory)
 	--get all files in directory
 	dir = directory
+	
+	--Sanitize directory: remove trailing slash if it exists
+	if dir:sub(-1) == "/" then
+		dir = dir:sub(1, -2)
+	end
+
 	files = love.filesystem.getDirectoryItems(dir)
+
+	-- MOBILE ENHANCEMENT: Sort the files
+	table.sort(files, sort_files_logic)
 
 	--create buttons
 	filegui = {}
 	for i = 1, #files do
 		local file = files[i]
-		local cdir = dir
-		--get rid of last / if it exists
-		if cdir:sub(-1) == "/" then
-			cdir = cdir:sub(1, -2)
-		end
-		local filepath = cdir .. "/" .. file
+		
+		--Robust path creation
+		local filepath = (dir == "") and file or (dir .. "/" .. file)
+
 		local info = love.filesystem.getInfo(filepath)
 		filegui[file] = {}
-		if info.type == "directory" then
-			--delete
-			filegui[file][1] = guielement:new("button", 349, listy+listsize*(i-1), "", openprompt, 2, {"delete", file}, 1.5, 18)
-			filegui[file][1].filebrowserimage = 1
-			--rename
-			filegui[file][2] = guielement:new("button", 312, listy+listsize*(i-1), "", openprompt, 2, {"rename", file}, 1.5, 18)
-			filegui[file][2].filebrowserimage = 3
-			--open folder
-			filegui[file][3] = guielement:new("button", 284, listy+listsize*(i-1), "", loaddirectory, 2, {filepath}, 1.5, 18)
-			filegui[file][3].filebrowserimage = 4
-		elseif info.type == "file" then
-			--delete
-			filegui[file][1] = guielement:new("button", 349, listy+listsize*(i-1), "", openprompt, 2, {"delete", file}, 1.5, 18)
-			filegui[file][1].filebrowserimage = 1
-			--rename
-			filegui[file][2] = guielement:new("button", 312, listy+listsize*(i-1), "", openprompt, 2, {"rename", file}, 1.5, 18)
-			filegui[file][2].filebrowserimage = 3
-			--edit file
-			filegui[file][3] = guielement:new("button", 284, listy+listsize*(i-1), "", openprompt, 2, {"edit", file}, 1.5, 18)
-			filegui[file][3].filebrowserimage = 2
+		
+		--Ensure info exists before checking type
+		if info then 
+			if info.type == "directory" then
+				--delete
+				filegui[file][1] = guielement:new("button", 349, listy+listsize*(i-1), "", openprompt, 2, {"delete", file}, 1.5, 18)
+				filegui[file][1].filebrowserimage = 1
+				--rename
+				filegui[file][2] = guielement:new("button", 312, listy+listsize*(i-1), "", openprompt, 2, {"rename", file}, 1.5, 18)
+				filegui[file][2].filebrowserimage = 3
+				--open folder
+				filegui[file][3] = guielement:new("button", 284, listy+listsize*(i-1), "", loaddirectory, 2, {filepath}, 1.5, 18)
+				filegui[file][3].filebrowserimage = 4
+			elseif info.type == "file" then
+				--delete
+				filegui[file][1] = guielement:new("button", 349, listy+listsize*(i-1), "", openprompt, 2, {"delete", file}, 1.5, 18)
+				filegui[file][1].filebrowserimage = 1
+				--rename
+				filegui[file][2] = guielement:new("button", 312, listy+listsize*(i-1), "", openprompt, 2, {"rename", file}, 1.5, 18)
+				filegui[file][2].filebrowserimage = 3
+				--edit file
+				filegui[file][3] = guielement:new("button", 284, listy+listsize*(i-1), "", openprompt, 2, {"edit", file}, 1.5, 18)
+				filegui[file][3].filebrowserimage = 2
+			end
 		end
 	end
 end
@@ -121,9 +150,11 @@ function filebrowser_update(dt)
 
 	for i = 1, #files do
 		local file = files[i]
-		for j, w in pairs(filegui[file]) do
-			w.y = listy+listsize*(i-1) - listscroll + 3
-			w:update(dt)
+		if filegui[file] then
+			for j, w in pairs(filegui[file]) do
+				w.y = listy+listsize*(i-1) - listscroll + 3
+				w:update(dt)
+			end
 		end
 	end
 
@@ -148,10 +179,12 @@ function filebrowser_draw()
 			properprintfast(file, 1*scale, (i*listsize+listy - listscroll + listsize - math.floor(listsize/2+4))*scale)
 		
 			--buttons
-			for j, w in pairs(filegui[file]) do
-				w:draw()
-				love.graphics.setColor(255, 255, 255)
-				love.graphics.draw(filebrowserimg, filebrowserquad[w.filebrowserimage], (w.x+5)*scale, (w.y+2)*scale, 0, scale, scale)
+			if filegui[file] then
+				for j, w in pairs(filegui[file]) do
+					w:draw()
+					love.graphics.setColor(255, 255, 255)
+					love.graphics.draw(filebrowserimg, filebrowserquad[w.filebrowserimage], (w.x+5)*scale, (w.y+2)*scale, 0, scale, scale)
+				end
 			end
 		end
 	end
@@ -199,9 +232,11 @@ function filebrowser_mousepressed(x, y, button)
 	if y > listy*scale and y < (height*16-27)*scale then
 		for i = 1, #files do
 			local file = files[i]
-			for j, w in pairs(filegui[file]) do
-				if w:click(x, y, button) then
-					return
+			if filegui[file] then
+				for j, w in pairs(filegui[file]) do
+					if w:click(x, y, button) then
+						return
+					end
 				end
 			end
 		end
@@ -226,13 +261,28 @@ function filebrowser_mousereleased(x, y, button)
 	--files
 	for i = 1, #files do
 		local file = files[i]
-		for j, w in pairs(filegui[file]) do
-			w:unclick(x, y, button)
+		if filegui[file] then
+			for j, w in pairs(filegui[file]) do
+				w:unclick(x, y, button)
+			end
 		end
 	end
 
 	for i, v in pairs(browsergui) do
 		v:unclick(x, y, button)
+	end
+end
+
+-- ENHANCEMENT: Added wheel support for scrolling
+function filebrowser_wheelmoved(x, y)
+	if prompt then return end
+	
+	if browsergui["scroll"] then
+		local scroll_speed = 0.1 -- Adjust sensitivity here
+		local current = browsergui["scroll"].value
+		-- Subtract y because wheel up is usually positive, but scroll value 0 is top
+		local new_val = math.max(0, math.min(1, current - (y * scroll_speed)))
+		browsergui["scroll"].value = new_val
 	end
 end
 
@@ -318,6 +368,12 @@ end
 
 function parentdirectory()
 	--get parent directory
+	
+	if dir == "" or dir == nil then
+		-- Already at root, maybe exit?
+		return
+	end
+
 	--first, get rid of last /
 	local cdir = dir
 	if cdir:sub(-1) == "/" then
@@ -413,10 +469,25 @@ end
 
 function filebrowser_keypressed(key, textinput)
 	if prompt then
+		-- MOBILE ENHANCEMENT: Back button closes prompt
+		if key == "escape" then
+			closeprompt()
+			return
+		end
+
 		for i, v in pairs(promptgui) do
 			v:keypress(key, textinput)
 		end
 		return
+	else
+		-- MOBILE ENHANCEMENT: Back button goes to parent directory
+		if key == "escape" then
+			if dir == "" or dir == nil then
+				filebrowser_exit()
+			else
+				parentdirectory()
+			end
+		end
 	end
 end
 
