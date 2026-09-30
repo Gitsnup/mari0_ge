@@ -1091,10 +1091,31 @@ function generatedailymappack()
 			.. "description=the last 7 days of daily challenges! one per world.\n"
 			.. "lives=3\n"
 			.. "physics=5")
-		local icon = love.filesystem.read("graphics/icon.png")
-		if icon then
-			love.filesystem.write(mappackpath .. "/icon.png", icon)
+	end
+
+	--icon: the same calendar-on-month-color the daily challenge screen
+	--shows, redrawn on every regeneration so the month color follows
+	local okicon, erricon = pcall(function()
+		local gp = graphicspack or "SMB"
+		if not love.filesystem.getInfo("graphics/" .. gp .. "/calendar.png") then
+			gp = "SMB"
 		end
+		local cal = love.graphics.newImage("graphics/" .. gp .. "/calendar.png")
+		local canvas = love.graphics.newCanvas(76, 76)
+		love.graphics.push()
+		love.graphics.setCanvas(canvas)
+		love.graphics.setColor(calendarcolors[tonumber(os.date("%m")) or 1])
+		love.graphics.rectangle("fill", 0, 0, 76, 76)
+		love.graphics.setColor(255, 255, 255)
+		love.graphics.draw(cal, 0, 0)
+		love.graphics.setCanvas()
+		love.graphics.pop()
+		canvas:newImageData():encode("png", mappackpath .. "/icon.png")
+		cal:release()
+		canvas:release()
+	end)
+	if not okicon then
+		print("daily challenge mappack: could not render icon: " .. tostring(erricon))
 	end
 
 	--remember the state the generator scribbles on, then put it back
