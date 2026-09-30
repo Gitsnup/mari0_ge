@@ -1105,27 +1105,38 @@ function generatedailymappack()
 	local oldcoincount, oldscore = mariocoincount, marioscore
 	local oldtl, oldbg, oldss, oldmi = mariotimelimit, background, spriteset, musici
 	local oldcustommusic, oldcustommusici = custommusic, custommusici
+	local olduserects = userects
 	objects = {}
 	objects["box"] = {}
 	objects["goomba"] = {}
 	objects["player"] = {}
 	objects["tile"] = {}
+	--the generator spawns entities (boxes etc.) that call adduserect(),
+	--which expects userects to exist. it normally is created when a level
+	--loads, so initialize it here or generation dies at menu time.
+	userects = {}
 
-	dailymappackgenerating = true
-	for i = 0, days-1 do
-		local t = os.time() - i*86400
-		datet = {os.date("%m", t), os.date("%d", t), os.date("%Y", t)}
+	local ok, err = pcall(function()
+		dailymappackgenerating = true
+		for i = 0, days-1 do
+			local t = os.time() - i*86400
+			datet = {os.date("%m", t), os.date("%d", t), os.date("%Y", t)}
 
-		createdailychallenge()
+			createdailychallenge()
 
-		local s = serializedcmappacklevel()
-		local fname = mappackpath .. "/1-" .. (i+1) .. ".txt"
-		local ok, err = pcall(love.filesystem.write, fname, s)
-		if not ok then
-			print("daily challenge mappack: could not write " .. fname .. ": " .. tostring(err))
+			local s = serializedcmappacklevel()
+			local fname = mappackpath .. "/1-" .. (i+1) .. ".txt"
+			local okw, errw = pcall(love.filesystem.write, fname, s)
+			if not okw then
+				print("daily challenge mappack: could not write " .. fname .. ": " .. tostring(errw))
+			end
 		end
+		dailymappackgenerating = false
+	end)
+	if not ok then
+		--restore state FIRST so the game keeps running, then report
+		print("daily challenge mappack generation failed: " .. tostring(err))
 	end
-	dailymappackgenerating = false
 
 	objects = oldobjects
 	map = oldmap
@@ -1135,6 +1146,10 @@ function generatedailymappack()
 	mariocoincount, marioscore = oldcoincount, oldscore
 	mariotimelimit, background, spriteset, musici = oldtl, oldbg, oldss, oldmi
 	custommusic, custommusici = oldcustommusic, oldcustommusici
+	userects = olduserects
 
-	love.filesystem.write(marker, today)
+	if ok then
+		--only mark as generated on success so a broken day retries next launch
+		love.filesystem.write(marker, today)
+	end
 end
