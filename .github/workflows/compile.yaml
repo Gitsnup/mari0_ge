@@ -2,6 +2,10 @@ name: Compile
 on: [push, pull_request]
 jobs:
   build:
+    # Tag pushes do not re-fire the build: the Compile run that already built
+    # the tagged commit produced the artifacts, and the release job below
+    # reuses them.
+    if: github.ref_type != 'tag'
     runs-on: ubuntu-24.04
     env:
       KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
@@ -84,15 +88,32 @@ jobs:
   release:
     name: Create GitHub Release
     needs: build
-    # Only runs when the push is a version tag, e.g. v1.6.1
-    if: startsWith(github.ref, 'refs/tags/v')
+    # Tags only fire the release. Artifacts come from the Compile run that
+    # already built the tagged commit; always() lets this job run when the
+    # build job above was skipped (i.e. on every tag push).
+    if: ${{ always() && startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+      actions: read
     steps:
+      - name: Find the Compile run that built this commit
+        id: findrun
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RUN_ID=$(gh api "repos/${{ github.repository }}/actions/runs?head_sha=${{ github.sha }}&status=success&per_page=100" \
+            --jq '.workflow_runs[] | select(.name == "Compile") | .id' | head -1)
+          if [ -z "$RUN_ID" ]; then
+            echo "::error::No successful Compile run found for commit ${{ github.sha }}. Tag only after the build for that commit has finished."
+            exit 1
+          fi
+          echo "run-id=$RUN_ID" >> "$GITHUB_OUTPUT"
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
+          run-id: ${{ steps.findrun.outputs.run-id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           path: artifacts
           pattern: mari0_ge-*
           merge-multiple: true
