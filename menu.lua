@@ -1916,6 +1916,10 @@ function mappacks()
 end
 
 function loadmappacks()
+	--keep the daily challenge mappack current (pcall so a generator
+	--problem can never take the mappack menu down with it)
+	pcall(generatedailymappack)
+
 	mappacktype = "local"
 	mappacklist = love.filesystem.getDirectoryItems( mappackfolder )
 

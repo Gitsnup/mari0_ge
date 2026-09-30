@@ -23,6 +23,7 @@ function getdailychallenge()
 	return DCchaltable[i].t, DCchaltable[i].name, DCchaltable[i]
 end
 local createscenery, rectangle, createflag
+local dailymappackgenerating = false --true while generatedailymappack() rebuilds past challenges
 
 DCchaltable = {
 	{
@@ -141,7 +142,9 @@ function createdailychallenge()
 		else
 			custommusics["dc"] = "sounds/overworld-fast.ogg"
 		end
-		music:load(custommusics["dc"])
+		if not dailymappackgenerating then
+			music:load(custommusics["dc"])
+		end
 	end
 	
 	mariotimelimit = 100
@@ -1024,4 +1027,114 @@ function createflag(ground)
 			end
 		end
 	end
+end
+
+function serializedcmappacklevel()
+	--serialize the current map exactly like game.lua's savemap() does,
+	--minus the editor-only options
+	local s = ""
+	local backgroundtile
+	for y = 1, mapheight do
+		for x = 1, mapwidth do
+			for i = 1, #map[x][y] do
+				s = s .. tostring(map[x][y][i])
+				--is the enemy offset horizontally?
+				if i == 2 and map[x][y]["argument"] then
+					s = s .. ":" .. tostring(map[x][y]["argument"])
+				end
+				--tack on a background tile
+				backgroundtile = bmapt(x, y, i)
+				if backgroundtile then
+					s = s .. "~" .. tostring(backgroundtile)
+				end
+				--seperator
+				if i ~= #map[x][y] then
+					s = s .. "-"
+				end
+			end
+			if y ~= mapheight or x ~= mapwidth then
+				s = s .. ","
+			end
+		end
+	end
+
+	s = s .. ";height=" .. mapheight
+	s = s .. ";background=" .. background
+	s = s .. ";spriteset=" .. spriteset
+	s = s .. ";music=" .. musici
+	s = s .. ";timelimit=" .. mariotimelimit
+
+	return s
+end
+
+function generatedailymappack()
+	--write the last 7 days of daily challenges into a normal, selectable
+	--mappack (alesans_entities/mappacks/daily_challenges) so they can be
+	--replayed like any other mappack. today's challenge is world 1.
+	local mappackpath = "alesans_entities/mappacks/daily_challenges"
+	local days = 7
+
+	love.filesystem.createDirectory("alesans_entities/mappacks")
+	love.filesystem.createDirectory(mappackpath)
+
+	--only regenerate when the date changed
+	local today = os.date("%m/%d/%Y")
+	local marker = mappackpath .. "/generated.txt"
+	if love.filesystem.getInfo(marker) and love.filesystem.read(marker) == today then
+		return
+	end
+
+	if not love.filesystem.getInfo(mappackpath .. "/settings.txt") then
+		love.filesystem.write(mappackpath .. "/settings.txt",
+			"name=daily challenges\n"
+			.. "author=mari0: GE\n"
+			.. "description=the last 7 days of daily challenges! one per world.\n"
+			.. "lives=3\n"
+			.. "physics=5")
+		local icon = love.filesystem.read("graphics/icon.png")
+		if icon then
+			love.filesystem.write(mappackpath .. "/icon.png", icon)
+		end
+	end
+
+	--remember the state the generator scribbles on, then put it back
+	local oldobjects, oldmap = objects, map
+	local oldmapwidth, oldmapheight = mapwidth, mapheight
+	local oldcurrentdc, oldcurrentdct = currentdc, currentdct
+	local olddatet = datet
+	local oldcoincount, oldscore = mariocoincount, marioscore
+	local oldtl, oldbg, oldss, oldmi = mariotimelimit, background, spriteset, musici
+	local oldcustommusic, oldcustommusici = custommusic, custommusici
+	objects = {}
+	objects["box"] = {}
+	objects["goomba"] = {}
+	objects["player"] = {}
+	objects["tile"] = {}
+
+	dailymappackgenerating = true
+	for i = 0, days-1 do
+		local t = os.time() - i*86400
+		datet = {os.date("%m", t), os.date("%d", t), os.date("%Y", t)}
+
+		createdailychallenge()
+
+		local s = serializedcmappacklevel()
+		local fname = mappackpath .. "/1-" .. (i+1) .. ".txt"
+		local ok, err = pcall(love.filesystem.write, fname, s)
+		if not ok then
+			print("daily challenge mappack: could not write " .. fname .. ": " .. tostring(err))
+		end
+	end
+	dailymappackgenerating = false
+
+	objects = oldobjects
+	map = oldmap
+	mapwidth, mapheight = oldmapwidth, oldmapheight
+	currentdc, currentdct = oldcurrentdc, oldcurrentdct
+	datet = olddatet
+	mariocoincount, marioscore = oldcoincount, oldscore
+	mariotimelimit, background, spriteset, musici = oldtl, oldbg, oldss, oldmi
+	custommusic, custommusici = oldcustommusic, oldcustommusici
+
+	love.filesystem.write(marker, today)
 end
