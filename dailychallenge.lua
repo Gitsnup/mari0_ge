@@ -22,6 +22,22 @@ function getdailychallenge()
 	local i = randomobj:random(1, #DCchaltable)
 	return DCchaltable[i].t, DCchaltable[i].name, DCchaltable[i]
 end
+
+function setdailychallengeforlevel(world, level)
+	--map a daily challenges mappack level (world 1, level N) to the
+	--challenge from N-1 days ago so mappack play can use daily
+	--challenge win conditions (mappackdcwin)
+	if world ~= 1 or not tonumber(level) then
+		return
+	end
+	local t = os.time() - (level-1)*86400
+	local olddatet = datet
+	datet = {os.date("%m", t), os.date("%d", t), os.date("%Y", t)}
+	local cdc, dcname, dct = getdailychallenge()
+	datet = olddatet
+	currentdc = cdc
+	currentdct = dct
+end
 local createscenery, rectangle, createflag
 local dailymappackgenerating = false --true while generatedailymappack() rebuilds past challenges
 
@@ -1077,24 +1093,19 @@ function generatedailymappack()
 	love.filesystem.createDirectory("alesans_entities/mappacks")
 	love.filesystem.createDirectory(mappackpath)
 
-	--only regenerate when the date changed
-	local today = os.date("%m/%d/%Y")
-	local marker = mappackpath .. "/generated.txt"
-	if love.filesystem.getInfo(marker) and love.filesystem.read(marker) == today then
-		return
-	end
-
-	if not love.filesystem.getInfo(mappackpath .. "/settings.txt") then
-		love.filesystem.write(mappackpath .. "/settings.txt",
-			"name=daily challenges\n"
-			.. "author=mari0: GE\n"
-			.. "description=the last 7 days of daily challenges! one per world.\n"
-			.. "lives=3\n"
-			.. "physics=5")
+	--make sure the dcwin setting is present even on mappacks generated
+	--before the setting existed (runs before the date marker check so
+	--existing installs pick it up on next launch)
+	if love.filesystem.getInfo(mappackpath .. "/settings.txt") then
+		local s = love.filesystem.read(mappackpath .. "/settings.txt") or ""
+		if not s:find("dcwin", 1, true) then
+			love.filesystem.append(mappackpath .. "/settings.txt", "\ndcwin=t")
+		end
 	end
 
 	--icon: the same calendar-on-month-color the daily challenge screen
-	--shows, redrawn on every regeneration so the month color follows
+	--shows. re-rendered on every launch (before the date marker check)
+	--so the icon follows the month color and old installs pick it up
 	local okicon, erricon = pcall(function()
 		local gp = graphicspack or "SMB"
 		if not love.filesystem.getInfo("graphics/" .. gp .. "/calendar.png") then
@@ -1116,6 +1127,23 @@ function generatedailymappack()
 	end)
 	if not okicon then
 		print("daily challenge mappack: could not render icon: " .. tostring(erricon))
+	end
+
+	--only regenerate the levels when the date changed
+	local today = os.date("%m/%d/%Y")
+	local marker = mappackpath .. "/generated.txt"
+	if love.filesystem.getInfo(marker) and love.filesystem.read(marker) == today then
+		return
+	end
+
+	if not love.filesystem.getInfo(mappackpath .. "/settings.txt") then
+		love.filesystem.write(mappackpath .. "/settings.txt",
+			"name=daily challenges\n"
+			.. "author=mari0: GE\n"
+			.. "description=the last 7 days of daily challenges! one per world.\n"
+			.. "lives=3\n"
+			.. "physics=5\n"
+			.. "dcwin=t")
 	end
 
 	--remember the state the generator scribbles on, then put it back

@@ -28,6 +28,9 @@ function loadmappacksettings(suspended)
 			nolowtime = true
 		elseif s2[1] == "usesuspends" then
 			alwaysdeletesuspend = true
+		elseif s2[1] == "dcwin" then
+			--win levels via daily challenge conditions (see dailychallenge.lua)
+			mappackdcwin = true
 		elseif s2[1] == "character" then
 			for i = 1, players do
 				setcustomplayer(s2[2], i)

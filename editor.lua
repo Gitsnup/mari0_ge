@@ -290,6 +290,8 @@ function editor_load(player_position) --{x, y, xscroll, yscroll}
 	guielements["continuemusiccheckbox"] = guielement:new("checkbox", 294, guielements["realtimecheckbox"].y+11+10*count, togglecontinuemusic, continuesublevelmusic, TEXT["cont. music"])
 	_, count = TEXT["cont. music"]:gsub("\n", '')
 	guielements["nolowtimecheckbox"] = guielement:new("checkbox", 294, guielements["continuemusiccheckbox"].y+11+10*count, togglenolowtime, nolowtime, TEXT["no low time"])
+	_, count = TEXT["no low time"]:gsub("\n", '')
+	guielements["dcwincheckbox"] = guielement:new("checkbox", 294, guielements["nolowtimecheckbox"].y+11+10*count, toggledcwin, mappackdcwin, TEXT["daily challenge win"])
 
 	--MAPS
 	guielements["savebutton2"] = guielement:new("button", 300, 196, TEXT["save level"], guielements["savebutton"].func, 0, nil, 2.4, 94, true)
@@ -2769,6 +2771,7 @@ function editor_draw()
 			guielements["realtimecheckbox"]:draw()
 			guielements["continuemusiccheckbox"]:draw()
 			guielements["nolowtimecheckbox"]:draw()
+			guielements["dcwincheckbox"]:draw()
 			
 			properprintF(TEXT["lives:"], 228*scale, 106*scale)
 			guielements["livesincrease"]:draw()
@@ -3441,6 +3444,7 @@ function toolstab()
 	guielements["realtimecheckbox"].active = true
 	guielements["continuemusiccheckbox"].active = true
 	guielements["nolowtimecheckbox"].active = true
+	guielements["dcwincheckbox"].active = true
 end
 
 function mapstab()
@@ -7737,6 +7741,9 @@ function savesettings()
 	if nolowtime then
 		s = s .. "nolowtime=t\n"
 	end
+	if mappackdcwin then
+		s = s .. "dcwin=t\n"
+	end
 	
 	love.filesystem.createDirectory( mappackfolder )
 	love.filesystem.createDirectory( mappackfolder .. "/" .. mappack )
@@ -7974,6 +7981,15 @@ function togglenolowtime(var)
 		nolowtime = not nolowtime
 	end
 	guielements["nolowtimecheckbox"].var = nolowtime
+end
+
+function toggledcwin(var)
+	if var ~= nil then
+		mappackdcwin = var
+	else
+		mappackdcwin = not mappackdcwin
+	end
+	guielements["dcwincheckbox"].var = mappackdcwin
 end
 
 function updatescrollfactor()

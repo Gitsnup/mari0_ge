@@ -49,6 +49,7 @@ function game_load(suspended, deletesuspend)
 	nolowtime = false
 	nocoinlimit = false
 	alwaysdeletesuspend = false
+	mappackdcwin = false
 	setphysics(1)
 	if not dcplaying then
 		loadmappacksettings()
@@ -96,6 +97,13 @@ function game_load(suspended, deletesuspend)
 		updatemappacksettings("suspended")
 	elseif suspended then
 		marioworld = suspended
+	end
+
+	--daily challenge win conditions in mappack play: the daily
+	--challenges mappack maps world 1 level N to the challenge from
+	--N-1 days ago
+	if (not dcplaying) and mappackdcwin and mappack == "daily_challenges" then
+		setdailychallengeforlevel(marioworld, mariolevel)
 	end
 	
 	if deletesuspend or alwaysdeletesuspend then
@@ -1478,7 +1486,7 @@ function game_update(dt)
 	end
 	
 	--daily challenge win check
-	if dcplaying then
+	if dcplaying or (mappackdcwin and currentdct) then
 		if checkdcwin(dt) then
 			return
 		end
