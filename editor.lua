@@ -2232,6 +2232,7 @@ function editor_draw()
 		guielements["tabmaps"]:draw()
 		guielements["tabcustom"]:draw()
 		guielements["tabanimations"]:draw()
+		guielements["tabwin"]:draw()
 		
 		if editorstate == "tiles" then
 			--TILES
