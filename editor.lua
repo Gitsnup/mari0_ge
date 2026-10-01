@@ -150,6 +150,15 @@ function editor_load(player_position) --{x, y, xscroll, yscroll}
 	guielements["tabcustom"].fillcolor = {63, 63, 63}
 	guielements["tabanimations"] = guielement:new("button", guielements["tabcustom"].x+guielements["tabcustom"].width+10, 1, TEXT["animations"], animationstab, 3)
 	guielements["tabanimations"].fillcolor = {63, 63, 63}
+	guielements["tabwin"] = guielement:new("button", guielements["tabanimations"].x+guielements["tabanimations"].width+10, 1, TEXT["win"], wintab, 3)
+	guielements["tabwin"].fillcolor = {63, 63, 63}
+	
+	--WIN
+	guielements["winconditiondropdown"] = guielement:new("dropdown", 17, 30, 13, changewincondition, 1, TEXT["none"], TEXT["collect coins"], TEXT["collect few coins"], TEXT["defeat all enemies"], TEXT["reach the top"])
+	guielements["winconditioninput"] = guielement:new("input", 17, 47, 3, changewinconditionamount, 50, 3, nil, nil, 0)
+	guielements["winconditioninput"].active = false
+	guielements["winenemydropdown"] = guielement:new("dropdown", 17, 64, 13, changewinenemy, 1, unpack(enemies))
+	guielements["winenemydropdown"].active = false
 	
 	--MAIN
 	if android then
@@ -3224,6 +3233,18 @@ function editor_draw()
 				love.graphics.setColor(90, 90, 90)
 				drawrectangle(animationguiarea[1]-10, animationguiarea[4], 10, 10)
 			end
+		elseif editorstate == "win" then
+			if editormenuopen then
+				properprintF(TEXT["win condition"], 17*scale, 20*scale)
+				guielements["winconditiondropdown"]:draw()
+				if guielements["winconditioninput"].active then
+					properprintF(TEXT["amount"], 17*scale, 40*scale)
+					guielements["winconditioninput"]:draw()
+				elseif guielements["winenemydropdown"].active then
+					properprintF(TEXT["enemy"], 17*scale, 57*scale)
+					guielements["winenemydropdown"]:draw()
+				end
+			end
 			
 			--GUI not priority
 			for i, v in pairs(guielements) do
@@ -3484,6 +3505,97 @@ function mapstab()
 	
 	switchworldselection(marioworld)
 	updatelevelscrollbar()
+end
+
+function wintab()
+	if _G["from" .. editorstate .. "tab"] then
+		_G["from" .. editorstate .. "tab"]()
+	end
+
+	editorstate = "win"
+	for i, v in pairs(guielements) do
+		v.active = false
+	end
+	tilemenuy = 0
+	tilemenumoving = false
+	
+	guielements["tabmain"].fillcolor = {63, 63, 63}
+	guielements["tabtiles"].fillcolor = {63, 63, 63}
+	guielements["tabtools"].fillcolor = {63, 63, 63}
+	guielements["tabmaps"].fillcolor = {63, 63, 63}
+	guielements["tabcustom"].fillcolor = {63, 63, 63}
+	guielements["tabanimations"].fillcolor = {63, 63, 63}
+	guielements["tabwin"].fillcolor = {0, 0, 0}
+	guielements["tabmain"].active = true
+	guielements["tabtiles"].active = true
+	guielements["tabtools"].active = true
+	guielements["tabmaps"].active = true
+	guielements["tabcustom"].active = true
+	guielements["tabanimations"].active = true
+	guielements["tabwin"].active = true
+	
+	guielements["winconditiondropdown"].active = true
+	updatewinconditiongui()
+end
+
+function updatewinconditiongui()
+	--reflect mapwincondition in the win tab's widgets
+	--(dropdown entries: 1 none, 2 coins, 3 lowcoins, 4 kill, 5 top)
+	local t = mapwincondition and mapwincondition.type or "none"
+	local i = 1
+	if t == "coins" then
+		i = 2
+	elseif t == "lowcoins" then
+		i = 3
+	elseif t == "kill" then
+		i = 4
+	elseif t == "top" then
+		i = 5
+	end
+	guielements["winconditiondropdown"].var = i
+	guielements["winconditioninput"].active = (i == 2 or i == 3)
+	if i == 2 or i == 3 then
+		guielements["winconditioninput"].value = mapwincondition.count or 50
+	end
+	guielements["winenemydropdown"].active = (i == 4)
+	if i == 4 then
+		for j = 1, #enemies do
+			if enemies[j] == (mapwincondition.enemy or "goomba") then
+				guielements["winenemydropdown"].var = j
+			end
+		end
+	end
+end
+
+function changewincondition(var)
+	if var == 2 then
+		mapwincondition = {type = "coins", count = tonumber(guielements["winconditioninput"].value) or 50}
+	elseif var == 3 then
+		mapwincondition = {type = "lowcoins", count = tonumber(guielements["winconditioninput"].value) or 50}
+	elseif var == 4 then
+		mapwincondition = {type = "kill", enemy = enemies[guielements["winenemydropdown"].var] or "goomba"}
+	elseif var == 5 then
+		mapwincondition = {type = "top"}
+	else
+		mapwincondition = nil
+	end
+	levelmodified = true
+	updatewinconditiongui()
+end
+
+function changewinconditionamount(var)
+	if mapwincondition and (mapwincondition.type == "coins" or mapwincondition.type == "lowcoins") then
+		mapwincondition.count = tonumber(var) or mapwincondition.count
+		levelmodified = true
+	end
+end
+
+function changewinenemy(var)
+	if mapwincondition and mapwincondition.type == "kill" then
+		mapwincondition.enemy = enemies[var] or "goomba"
+		guielements["winenemydropdown"].var = var
+		levelmodified = true
+	end
 end
 
 function customtab()
@@ -4621,6 +4733,8 @@ function editoropen()
 		customtab()
 	elseif editorstate == "animations" then
 		animationstab()
+	elseif editorstate == "win" then
+		wintab()
 	end
 end
 

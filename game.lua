@@ -1,3 +1,9 @@
+enemies = { "goomba", "koopa", "hammerbro", "plant", "lakito", "bowser", "cheep", "squid", "flyingfish", "cheepwhite", "cheepred", "beetle", "spikey",
+		"sidestepper", "barrel", "icicle", "angrysun", "splunkin", "firebro", "fishbone", "drybones", "muncher", "bigbeetle", "meteor",
+		"boomerangbro", "ninji", "boo", "mole", "bigmole", "bomb", "bombhalf", "torpedoted", "parabeetle", "parabeetleright", "boomboom",
+		"pinksquid", "shell", "shyguy", "beetleshell", "spiketop",  "pokey", "snowpokey", "fighterfly", "chainchomp", "rockywrench", "tinygoomba", "koopaling", "bowser3", "icebro",
+		"squidnanny", "goombashoe", "wiggler", "magikoopa", "spike", "spikeball", "plantcreeper"}
+
 local queuespritebatchupdate = false
 
 function game_load(suspended, deletesuspend)
@@ -74,11 +80,6 @@ function game_load(suspended, deletesuspend)
 	--granted despawning immunity when mario goes through doors
 	--killed by rainboom
 	--deep copied by regiontrigger
-	enemies = { "goomba", "koopa", "hammerbro", "plant", "lakito", "bowser", "cheep", "squid", "flyingfish", "cheepwhite", "cheepred", "beetle", "spikey",
-		"sidestepper", "barrel", "icicle", "angrysun", "splunkin", "firebro", "fishbone", "drybones", "muncher", "bigbeetle", "meteor",
-		"boomerangbro", "ninji", "boo", "mole", "bigmole", "bomb", "bombhalf", "torpedoted", "parabeetle", "parabeetleright", "boomboom",
-		"pinksquid", "shell", "shyguy", "beetleshell", "spiketop",  "pokey", "snowpokey", "fighterfly", "chainchomp", "rockywrench", "tinygoomba", "koopaling", "bowser3", "icebro",
-		"squidnanny", "goombashoe", "wiggler", "magikoopa", "spike", "spikeball", "plantcreeper"}
 	--aren't spawned when player at checkpoint
 	checkpointignoreenemies = { "goomba", "koopa", "hammerbro", "plant", "lakito", "bowser", "cheep", "squid", "flyingfish", "goombahalf", "koopahalf", "cheepwhite", "cheepred", "koopared", "kooparedhalf", "kooparedflying", "beetle", "beetlehalf", "spikey", "spikeyhalf", "downplant", "paragoomba", "sidestepper", "barrel", "icicle", "angrysun", "splunkin", "biggoomba", "firebro", "redplant", "reddownplant", "fishbone", "drybones", "muncher", "dryboneshalf", "bigbeetle", "meteor", "drygoomba", "dryplant", "drydownplant", "boomerangbro", "ninji", "boo", "mole", "bigmole", "bomb", "bombhalf", "fireplant", "downfireplant", "torpedoted", "parabeetle", "parabeetleright", "boomboom", "koopablue", "koopabluehalf", "pinksquid", "shell", "shyguy", "shyguyhalf", "beetleshell", "spiketop", "spiketophalf", "pokey", "snowpokey", "fighterfly", "chainchomp", "bighammerbro", "rockywrench", "tinygoomba", "koopaling", "bowser3", "icebro", "squidnanny", "goombashoe", "wiggler", "magikoopa", "spike", "spikeball", "plantcreeper"}
 	
@@ -99,12 +100,7 @@ function game_load(suspended, deletesuspend)
 		marioworld = suspended
 	end
 
-	--daily challenge win conditions in mappack play: the daily
-	--challenges mappack maps world 1 level N to the challenge from
-	--N-1 days ago
-	if (not dcplaying) and mappackdcwin and mappack == "daily_challenges" then
-		setdailychallengeforlevel(marioworld, mariolevel)
-	end
+	--daily challenge win conditions are set up per level in startlevel
 	
 	if deletesuspend or alwaysdeletesuspend then
 		-- On starting a new game, remove the old save
@@ -1486,7 +1482,7 @@ function game_update(dt)
 	end
 	
 	--daily challenge win check
-	if dcplaying or (mappackdcwin and currentdct) then
+	if dcplaying or (currentdct and (mappackdcwin or mapwincondition)) then
 		if checkdcwin(dt) then
 			return
 		end
@@ -4232,6 +4228,33 @@ function startlevel(level, reason)
 	end
 	originalmapwidth = mapwidth
 	
+	--WIN CONDITION
+	--objective wins are a gameplay thing only: never in the editor or in
+	--editor playtests, where finishing a level must not skip you forward.
+	if dcplaying then
+		--createdailychallenge() set currentdct up already
+	elseif editormode or testlevel then
+		currentdct = nil
+	elseif mapwincondition then
+		--this level defines its own win requirement (editor win tab)
+		currentdct = {
+			t = "levelwin",
+			name = TEXT["level win"],
+			finish = {mapwincondition.type, mapwincondition.count or mapwincondition.enemy},
+		}
+		if mapwincondition.type == "coins" or mapwincondition.type == "lowcoins" then
+			--coins are otherwise carried between levels, so a "collect N
+			--coins" requirement counts from zero on this level
+			mariocoincount = 0
+		end
+	elseif mappackdcwin and mappack == "daily_challenges" then
+		--the daily challenges mappack maps world 1 level N to the
+		--challenge from N-1 days ago
+		setdailychallengeforlevel(marioworld, mariolevel)
+	else
+		currentdct = nil
+	end
+	
 	if musici > 7 then
 		custommusic = mappackfolder .. "/" .. mappack .. "/" .. musictable[musici]
 	else
@@ -4516,6 +4539,8 @@ function loadmap(filename)
 	local s = love.filesystem.read( mappackfolder .. "/" .. mappack .. "/" .. filename .. ".txt" )
 	local s2 = s:split(";")
 	
+	mapwincondition = nil --per level win requirement, parsed below
+	
 	if s2[2] and s2[2]:sub(1,7) == "height=" then
 		mapheight = tonumber(s2[2]:sub(8,-1)) or 15
 	elseif love.filesystem.getInfo(mappackfolder .. "/" .. mappack .. "/heights/" .. marioworld .. "-" .. mariolevel .. "_" .. actualsublevel .. ".txt") then
@@ -4679,6 +4704,17 @@ function loadmap(filename)
 		elseif s3[1] == "custommusic" then
 			if tonumber(s3[2]) ~= nil then
 				custommusici = tonumber(s3[2])
+			end
+		elseif s3[1] == "win" then
+			--per level win requirement, set in the editor's win tab
+			--format: win=<type>:<param>  (coins:N, lowcoins:N, kill:enemy, top)
+			local w = (s3[2] or ""):split(":")
+			if w[1] == "coins" or w[1] == "lowcoins" then
+				mapwincondition = {type = w[1], count = tonumber(w[2]) or 50}
+			elseif w[1] == "kill" and w[2] and w[2] ~= "" then
+				mapwincondition = {type = "kill", enemy = w[2]}
+			elseif w[1] == "top" then
+				mapwincondition = {type = "top"}
 			end
 		end
 	end
@@ -6150,6 +6186,18 @@ function savemap(filename)
 	s = s .. ";scrollfactor2y=" .. scrollfactor2y
 	if nofunallowed then
 		s = s .. ";nofunallowed"
+	end
+
+	if mapwincondition then
+		if mapwincondition.type == "coins" then
+			s = s .. ";win=coins:" .. tostring(mapwincondition.count or 50)
+		elseif mapwincondition.type == "lowcoins" then
+			s = s .. ";win=lowcoins:" .. tostring(mapwincondition.count or 50)
+		elseif mapwincondition.type == "kill" then
+			s = s .. ";win=kill:" .. tostring(mapwincondition.enemy)
+		elseif mapwincondition.type == "top" then
+			s = s .. ";win=top"
+		end
 	end
 
 	s = s .. ";vs=" .. VERSION

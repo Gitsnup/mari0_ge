@@ -812,7 +812,7 @@ end
 
 function checkdcwin(dt)
 	local t = currentdct
-	if not t.finish then
+	if not t or not t.finish then
 		return false
 	end
 	local pass = false
@@ -826,7 +826,7 @@ function checkdcwin(dt)
 			pass = true
 		end
 	elseif v[1] == "kill" then
-		if #objects[v[2]] == 0 then
+		if objects[v[2]] and #objects[v[2]] == 0 then
 			pass = true
 		end
 	elseif v[1] == "top" then
