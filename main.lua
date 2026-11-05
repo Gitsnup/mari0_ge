@@ -2601,7 +2601,7 @@ end
 
 function openSaveFolder(subfolder) --By Slime
 	if android then
-		notice.new("On android try a file manager\nand go to:\nAndroid > data > Love.to.mario", notice.white, 5)
+		notice.new("Android save folder (ADB):\n/sdcard/Android/data/\nlove.to.androidmari0/files/save/\nmari0_android", notice.white, 5)
 		filebrowser_load(subfolder or "")
 		return true
 	end

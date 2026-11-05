@@ -2817,7 +2817,7 @@ function menu_keypressed(key, unicode)
 				if optionsselection == 3 then
 					--open characters folder
 					if android then
-						notice.new("On android try a file manager\nand go to:\nAndroid > data > Love.to.mario >\nfiles > save > mari0_android", notice.red, 5)
+						notice.new("Android save folder (ADB):\n/sdcard/Android/data/\nlove.to.androidmari0/files/save/\nmari0_android", notice.red, 5)
 					end
 					if not love.filesystem.getInfo("alesans_entities/characters") then
 						love.filesystem.createDirectory("alesans_entities/characters")
@@ -3267,7 +3267,7 @@ function opendlcfolder()
 	end
 
 	if android then
-		notice.new("On android use a file manager\nand go to:\nAndroid > data > Love.to.mario", notice.white, 5)
+		notice.new("Android save folder (ADB):\n/sdcard/Android/data/\nlove.to.androidmari0/files/save/\nmari0_android", notice.white, 5)
 		filebrowser_load("alesans_entities/" .. path)
 		return false
 	end

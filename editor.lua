@@ -7556,7 +7556,7 @@ function exportcustomimage(arg)
 end
 function opencustomimagefolder(f)
 	if android then
-		notice.new("On android try a file manager\nand go to:\nAndroid > data > Love.to.mario >\nfiles > save > mari0_android", notice.red, 5)
+		notice.new("Android save folder (ADB):\n/sdcard/Android/data/\nlove.to.androidmari0/files/save/\nmari0_android", notice.red, 5)
 	end
 	if customtabstate == "graphics" then
 		if not love.filesystem.getInfo( mappackfolder .. "/" .. mappack .. "/custom", "directory") then
