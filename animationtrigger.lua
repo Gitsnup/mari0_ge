@@ -25,14 +25,7 @@ end
 
 function animationtrigger:input(t)
 	if t == "on" or t == "toggle" then
-		if not animationtriggerfuncs[self.id] then
-			return
-		end
-		
-		for i = 1, #animationtriggerfuncs[self.id] do
-			animationtriggerfuncs[self.id][i]:trigger()
-		end
-		animationtriggerfuncs[self.id].triggered = true
+		animationsystem_trigger(self.id)
 	end
 end
 

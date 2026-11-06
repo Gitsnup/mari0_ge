@@ -4236,7 +4236,7 @@ function startlevel(level, reason)
 	elseif editormode or testlevel then
 		currentdct = nil
 	elseif mapwincondition then
-		--this level defines its own win requirement (editor win tab)
+		--legacy per-level objective stored in the level data
 		currentdct = {
 			t = "levelwin",
 			name = TEXT["level win"],
@@ -4706,7 +4706,7 @@ function loadmap(filename)
 				custommusici = tonumber(s3[2])
 			end
 		elseif s3[1] == "win" then
-			--per level win requirement, set in the editor's win tab
+			--legacy per-level objective stored in the level data
 			--format: win=<type>:<param>  (coins:N, lowcoins:N, kill:enemy, top)
 			local w = (s3[2] or ""):split(":")
 			if w[1] == "coins" or w[1] == "lowcoins" then

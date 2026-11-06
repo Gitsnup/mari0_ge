@@ -853,7 +853,10 @@ function checkdcwin(dt)
 		else
 			realmariotime = mariotime
 		end
-		nextlevel()
+		local usedaction = mappack == "daily_challenges" and mappackdcwin and animationsystem_trigger("daily_challenges_win")
+		if not usedaction then
+			nextlevel()
+		end
 		return true
 	end
 	return false
@@ -1092,6 +1095,16 @@ function generatedailymappack()
 
 	love.filesystem.createDirectory("alesans_entities/mappacks")
 	love.filesystem.createDirectory(mappackpath)
+	local winanimationpath = mappackpath .. "/animations/daily_challenges_win.json"
+	love.filesystem.createDirectory(mappackpath .. "/animations")
+	if not love.filesystem.getInfo(winanimationpath) then
+		local winanimation = {
+			triggers = {{"animationtrigger", "daily_challenges_win"}},
+			conditions = {},
+			actions = {{"nextlevel"}},
+		}
+		love.filesystem.write(winanimationpath, JSON:encode_pretty(winanimation))
+	end
 
 	--make sure the dcwin setting is present even on mappacks generated
 	--before the setting existed (runs before the date marker check so
