@@ -158,13 +158,7 @@
 		"maps": "maps",
 		"custom": "custom",
 		"animations": "animations",
-		"win": "win",
-		"win condition": "win condition",
 		"amount": "amount",
-		"collect coins": "collect coins",
-		"collect few coins": "collect few coins",
-		"defeat all enemies": "defeat all enemies",
-		"reach the top": "reach the top",
 		"level win": "level win",
 		"enemy": "enemy",
 	"^_Main":"",
@@ -356,5 +350,5 @@
 
 "^_Notices":"",
 	"Map saved!": "Map saved!",
-	"game saved!": "game saved!",
+	"game saved!": "game saved!"
 }

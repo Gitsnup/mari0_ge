@@ -44,6 +44,18 @@ function animationsystem_load()
 	end
 end
 
+function animationsystem_trigger(id)
+	if not animationtriggerfuncs[id] then
+		return false
+	end
+
+	for i = 1, #animationtriggerfuncs[id] do
+		animationtriggerfuncs[id][i]:trigger()
+	end
+	animationtriggerfuncs[id].triggered = true
+	return true
+end
+
 function animationsystem_update(dt)
 	if not editormode then
 		for i, v in pairs(animations) do
